@@ -63,11 +63,23 @@ import { Perf } from 'r3f-webgpu-perf'
 
 ## 6. Publicar
 
+Se sua conta NPM tem 2FA ativo (recomendado), use o código do autenticador:
+
+```bash
+npm publish --access public --otp=123456
+```
+
+Substitua `123456` pelo código de 6 dígitos do seu app autenticador.
+
+Sem 2FA:
+
 ```bash
 npm publish --access public
 ```
 
 O script `prepublishOnly` roda `npm run build` automaticamente antes de publicar.
+
+> **Status:** build e `npm pack` já foram validados. Nome `r3f-webgpu-perf` está livre no registry. Login ativo como `andersonmancini`. Falta apenas rodar o comando acima com seu OTP.
 
 ## 7. Confirmar no site
 

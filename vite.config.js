@@ -1,11 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import { resolve } from 'path'
 
 const isLibraryBuild = process.env.BUILD_LIB === 'true'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    ...(isLibraryBuild ? [cssInjectedByJsPlugin()] : []),
+  ],
   root: isLibraryBuild ? undefined : 'demo',
   resolve: {
     alias: isLibraryBuild
