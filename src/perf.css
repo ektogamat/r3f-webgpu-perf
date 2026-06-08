@@ -1,0 +1,613 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   WebGPU Performance Panel - Premium Dark Theme
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Color Palette - Dark Theme */
+  --perf-bg: rgba(8, 10, 15, 0.92);
+  --perf-glass: rgba(255, 255, 255, 0.03);
+  --perf-border: rgba(255, 255, 255, 0.08);
+  --perf-text: #ffffff;
+  --perf-text-dim: #a0aec0;
+  --perf-text-muted: #718096;
+  --perf-gauge-bg: rgba(0, 0, 0, 0.15);
+  
+  /* Metric Colors */
+  --perf-fps: #00ffd0;
+  --perf-gpu: #ff9f43;
+  --perf-cpu: #a78bfa;
+  --perf-success: #10b981;
+  --perf-warning: #f59e0b;
+  --perf-danger: #ef4444;
+  
+  /* Accent Gradients */
+  --perf-gradient-primary: linear-gradient(135deg, #00ffd0 0%, #a78bfa 100%);
+  --perf-gradient-glow: radial-gradient(ellipse at center, rgba(0, 255, 208, 0.15) 0%, transparent 70%);
+  
+  /* Sizing */
+  --perf-radius: 12px;
+  --perf-radius-sm: 8px;
+  --perf-padding: 12px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Main Panel Container
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-panel {
+  position: fixed;
+  z-index: 9999;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  color: var(--perf-text);
+  user-select: none;
+  pointer-events: auto;
+  
+  /* Glassmorphism */
+  background: var(--perf-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  
+  /* Gradient Border Effect */
+  border-radius: var(--perf-radius);
+  border: 1px solid var(--perf-border);
+  
+  /* Shadow */
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 60px -20px rgba(0, 255, 208, 0.1);
+  
+  /* Animation */
+  animation: perf-fade-in 0.3s ease-out;
+  
+  overflow: hidden;
+}
+
+.perf-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--perf-gradient-primary);
+  opacity: 0.6;
+  border-radius: var(--perf-radius) var(--perf-radius) 0 0;
+}
+
+/* Position Variants */
+.perf-panel.top-left { top: 16px; left: 16px; }
+.perf-panel.top-right { top: 16px; right: 16px; }
+.perf-panel.bottom-left { bottom: 16px; left: 16px; }
+.perf-panel.bottom-right { bottom: 16px; right: 16px; }
+
+/* Minimal Mode */
+.perf-panel.minimal {
+  min-width: 200px;
+}
+
+.perf-panel.minimal .perf-stats {
+  display: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Light Theme (Ice/Frost)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-panel.light {
+  --perf-bg: rgba(240, 245, 250, 0.92);
+  --perf-glass: rgba(0, 0, 0, 0.02);
+  --perf-border: rgba(0, 0, 0, 0.08);
+  --perf-text: #1a202c;
+  --perf-text-dim: #4a5568;
+  --perf-text-muted: #718096;
+  --perf-gauge-bg: rgba(255, 255, 255, 0.5);
+  
+  /* Slightly muted metric colors for light theme */
+  --perf-fps: #00c9a7;
+  --perf-gpu: #e67e22;
+  --perf-cpu: #8b5cf6;
+  
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+}
+
+.perf-panel.light::before {
+  background: linear-gradient(135deg, #00c9a7 0%, #8b5cf6 100%);
+}
+
+.perf-panel.light .perf-graph-container {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.perf-panel.light .perf-theme-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--perf-text-muted);
+}
+
+.perf-panel.light .perf-theme-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: var(--perf-text);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header Metrics Row
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: var(--perf-padding);
+  padding-bottom: 8px;
+}
+
+.perf-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 65px; /* Fixed min width to prevent jitter */
+}
+
+.perf-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  min-width: 55px; /* Fixed min width for numbers */
+  display: inline-block;
+}
+
+.perf-metric-value.fps { color: var(--perf-fps); }
+.perf-metric-value.gpu { color: var(--perf-gpu); }
+.perf-metric-value.cpu { color: var(--perf-cpu); }
+
+.perf-metric-label {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--perf-text-dim);
+  margin-top: 3px;
+}
+
+.perf-metric-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--perf-text-muted);
+  margin-left: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Overclock indicator */
+.perf-metric-value.overclock {
+  color: #ff6eff;
+  text-shadow: 0 0 10px rgba(255, 110, 255, 0.5);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Graph Section
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-graph-container {
+  position: relative;
+  height: 60px;
+  margin: 0 var(--perf-padding);
+  border-radius: var(--perf-radius-sm);
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.perf-graph-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--perf-gradient-glow);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.perf-graph {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Graph Legend */
+.perf-graph-legend {
+  display: flex;
+  gap: 12px;
+  padding: 6px var(--perf-padding);
+  padding-top: 4px;
+}
+
+.perf-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--perf-text-dim);
+}
+
+.perf-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.perf-legend-dot.fps { background: var(--perf-fps); }
+.perf-legend-dot.gpu { background: var(--perf-gpu); }
+.perf-legend-dot.cpu { background: var(--perf-cpu); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Stats Grid
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 8px var(--perf-padding);
+  padding-top: 4px;
+  border-top: 1px solid var(--perf-border);
+  margin-top: 8px;
+}
+
+.perf-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.perf-stat:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.perf-stat-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--perf-text-muted);
+  opacity: 0.7;
+}
+
+.perf-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--perf-text);
+  line-height: 1;
+}
+
+.perf-stat-label {
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--perf-text-muted);
+  margin-top: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   VRAM Bar
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-vram {
+  padding: 8px var(--perf-padding);
+  border-top: 1px solid var(--perf-border);
+}
+
+.perf-vram-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.perf-vram-label {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--perf-text-dim);
+}
+
+.perf-vram-value {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--perf-fps);
+}
+
+.perf-vram-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.perf-vram-fill {
+  height: 100%;
+  background: var(--perf-gradient-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Toggle Button
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 6px;
+  color: var(--perf-text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.perf-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--perf-text);
+}
+
+.perf-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Animations
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes perf-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes perf-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.perf-metric-value.warning {
+  animation: perf-pulse 1s ease infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .perf-panel {
+    min-width: 280px;
+  }
+  
+  .perf-header {
+    gap: 10px;
+  }
+  
+  .perf-metric-value {
+    font-size: 16px;
+  }
+  
+  .perf-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Gauge Meter
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.perf-gauge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.perf-gauge {
+  display: block;
+  position: relative;
+}
+
+/* Mini Gauge (vertical bar) */
+.perf-mini-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.perf-mini-gauge-track {
+  width: 6px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.perf-mini-gauge-fill {
+  width: 100%;
+  border-radius: 3px;
+  transition: height 0.2s ease;
+}
+
+.perf-mini-gauge-value {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.perf-mini-gauge-label {
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--perf-text-muted);
+}
+
+/* Panel with gauge layout */
+.perf-panel-with-gauge {
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+}
+
+.perf-panel-main {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.perf-panel-gauge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-right: 1px solid var(--perf-border);
+  background: rgba(0, 0, 0, 0.15);
+  order: -1; /* Force gauge to be first (left) */
+}
+
+/* Icon-only buttons (expand, hide) */
+.perf-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--perf-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.perf-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--perf-text);
+}
+
+.perf-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* Expand button below gauge */
+.perf-expand-btn.perf-icon-btn svg {
+  opacity: 0.9;
+}
+
+/* Hide button */
+.perf-hide-btn.perf-icon-btn svg {
+  opacity: 0.9;
+}
+
+/* Toolbar when no gauge - row of icon buttons */
+.perf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px var(--perf-padding) 4px;
+  border-bottom: 1px solid var(--perf-border);
+}
+
+.perf-panel.light .perf-icon-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--perf-text-muted);
+}
+
+.perf-panel.light .perf-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: var(--perf-text);
+}
+
+/* Hidden state: minimal dot to restore panel */
+.perf-panel-dot {
+  position: fixed;
+  z-index: 9999;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--perf-fps);
+  opacity: 0.1;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.perf-panel-dot:hover {
+  opacity: 0.5;
+}
+
+.perf-panel-dot.top-left { top: 16px; left: 16px; }
+.perf-panel-dot.top-right { top: 16px; right: 16px; }
+.perf-panel-dot.bottom-left { bottom: 16px; left: 16px; }
+.perf-panel-dot.bottom-right { bottom: 16px; right: 16px; }
+
+/* Theme toggle button */
+.perf-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--perf-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.perf-theme-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fbbf24; /* Sunny yellow on hover */
+}
+
+.perf-theme-btn:active {
+  transform: scale(0.95);
+}
+
+.perf-panel.light .perf-theme-btn:hover {
+  color: #6366f1; /* Indigo/purple for moon on hover */
+}
