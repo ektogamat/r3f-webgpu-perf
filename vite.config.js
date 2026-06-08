@@ -11,12 +11,40 @@ export default defineConfig({
     ...(isLibraryBuild ? [cssInjectedByJsPlugin()] : []),
   ],
   root: isLibraryBuild ? undefined : 'demo',
+  esbuild: {
+    target: 'esnext',
+  },
+  optimizeDeps: {
+    include: [
+      'three/addons/loaders/GLTFLoader.js',
+      'three/addons/loaders/KTX2Loader.js',
+      'three/addons/loaders/RGBELoader.js',
+      'three/addons/loaders/DRACOLoader.js',
+      'three/addons/libs/meshopt_decoder.module.js',
+      'three/addons/controls/OrbitControls.js',
+      'three/addons/tsl/display/GTAONode.js',
+      'three/addons/tsl/display/LensflareNode.js',
+    ],
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
+  server: {
+    fs: {
+      allow: ['..'],
+    },
+  },
   resolve: {
+    ...(isLibraryBuild ? {} : { dedupe: ['three'] }),
     alias: isLibraryBuild
       ? {}
-      : {
-          'r3f-webgpu-perf': resolve(__dirname, 'src'),
-        },
+      : [
+          { find: 'r3f-webgpu-perf', replacement: resolve(__dirname, 'src') },
+          { find: 'three/webgpu', replacement: resolve(__dirname, 'node_modules/three/build/three.webgpu.js') },
+          { find: 'three/tsl', replacement: resolve(__dirname, 'node_modules/three/build/three.tsl.js') },
+          { find: /^three\/addons\/(.*)/, replacement: resolve(__dirname, 'node_modules/three/examples/jsm/$1') },
+          { find: /^three$/, replacement: resolve(__dirname, 'node_modules/three/build/three.webgpu.js') },
+        ],
   },
   build: isLibraryBuild
     ? {
@@ -54,5 +82,6 @@ export default defineConfig({
     : {
         outDir: resolve(__dirname, 'demo-dist'),
         emptyOutDir: true,
+        target: 'esnext',
       },
 })

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- WebGPU demo with TSL `RenderPipeline` post-processing (bloom, chromatic aberration)
+- Instanced neon particle field with hero torus knot
+- Low / Med / Ultra GPU load presets in the demo
+
 ## [0.1.1] - 2026-06-08
 
 ### Added

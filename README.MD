@@ -111,10 +111,12 @@ Real WebGPU timestamp queries are not implemented yet — planned for a future r
 git clone https://github.com/ektogamat/r3f-webgpu-perf.git
 cd r3f-webgpu-perf
 npm install
-npm run dev         # demo with hot reload (localhost)
+npm run dev         # WebGPU demo with hot reload (Chrome/Edge recommended)
 npm run build       # build library to dist/
 npm run build:demo  # build demo to demo-dist/
 ```
+
+The demo uses **WebGPU + TSL post-processing** (`RenderPipeline`, `bloom`, `chromaticAberration`) with an instanced neon particle field and Low/Med/Ultra stress presets.
 
 ### Deploy demo (Vercel)
 

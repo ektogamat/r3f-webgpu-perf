@@ -1,29 +1,56 @@
-import { Canvas } from '@react-three/fiber'
+import { useEffect, useState } from 'react'
+import WebGPU from 'three/addons/capabilities/WebGPU.js'
 import { Perf } from 'r3f-webgpu-perf'
+import { DemoSettingsProvider } from './DemoSettings'
+import { WebGPUCanvas } from './WebGPUCanvas'
+import { Scene } from './Scene'
+import { DemoControls } from './DemoControls'
+import { DemoOverlay } from './DemoOverlay'
 
-function SpinningCubes() {
-  const cubes = []
-  for (let x = -2; x <= 2; x++) {
-    for (let z = -2; z <= 2; z++) {
-      cubes.push(
-        <mesh key={`${x}-${z}`} position={[x * 1.5, 0, z * 1.5]} rotation={[x, z, 0]}>
-          <boxGeometry args={[0.8, 0.8, 0.8]} />
-          <meshStandardMaterial color={`hsl(${(x + 2) * 40 + (z + 2) * 20}, 70%, 55%)`} />
-        </mesh>
-      )
-    }
-  }
-  return <>{cubes}</>
+function Unsupported() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#050508',
+        color: 'rgba(255,255,255,0.7)',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        padding: 24,
+        textAlign: 'center',
+      }}
+    >
+      <div>
+        <h2 style={{ color: '#00ffd0', marginBottom: 8 }}>WebGPU required</h2>
+        <p style={{ maxWidth: 420, lineHeight: 1.5 }}>
+          This demo uses WebGPU with TSL post-processing. Try Chrome or Edge with WebGPU enabled.
+        </p>
+      </div>
+    </div>
+  )
 }
 
 export function App() {
+  const [supported, setSupported] = useState(null)
+
+  useEffect(() => {
+    setSupported(WebGPU.isAvailable())
+  }, [])
+
+  if (supported === null) return null
+  if (!supported) return <Unsupported />
+
   return (
-    <Canvas camera={{ position: [0, 4, 8], fov: 50 }}>
-      <color attach="background" args={['#0a0a0f']} />
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[5, 8, 5]} intensity={1.2} />
-      <SpinningCubes />
-      <Perf position="top-left" showVRAM />
-    </Canvas>
+    <DemoSettingsProvider>
+      <WebGPUCanvas>
+        <Scene />
+        <Perf position="top-left" showVRAM />
+      </WebGPUCanvas>
+      <DemoOverlay />
+      <DemoControls />
+    </DemoSettingsProvider>
   )
 }
