@@ -22,7 +22,8 @@
     "url": "https://github.com/ektogamat/r3f-webgpu-perf/issues"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs/images"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
