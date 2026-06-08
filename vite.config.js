@@ -51,5 +51,8 @@ export default defineConfig({
         emptyOutDir: true,
         cssCodeSplit: false,
       }
-    : undefined,
+    : {
+        outDir: resolve(__dirname, 'demo-dist'),
+        emptyOutDir: true,
+      },
 })

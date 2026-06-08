@@ -1,8 +1,14 @@
 # r3f-webgpu-perf
 
+[![npm version](https://img.shields.io/npm/v/r3f-webgpu-perf.svg)](https://www.npmjs.com/package/r3f-webgpu-perf)
+[![license](https://img.shields.io/npm/l/r3f-webgpu-perf.svg)](https://github.com/ektogamat/r3f-webgpu-perf/blob/main/LICENSE)
+
 Easily monitor the performance of your [@react-three/fiber](https://github.com/pmndrs/react-three-fiber) application — with first-class support for WebGPU renderers where `gl.info` may be unavailable.
 
 Inspired by [r3f-perf](https://github.com/utsuboco/r3f-perf).
+
+| Add `<Perf />` inside your Canvas | [Live demo](https://r3f-webgpu-perf.vercel.app) |
+| --- | --- |
 
 ## Installation
 
@@ -105,20 +111,31 @@ Real WebGPU timestamp queries are not implemented yet — planned for a future r
 git clone https://github.com/ektogamat/r3f-webgpu-perf.git
 cd r3f-webgpu-perf
 npm install
-npm run dev      # demo app with hot reload
-npm run build    # build library to dist/
+npm run dev         # demo with hot reload (localhost)
+npm run build       # build library to dist/
+npm run build:demo  # build demo to demo-dist/
 ```
 
-## Publishing (maintainers)
+### Deploy demo (Vercel)
+
+First time — link the project:
 
 ```bash
-npm login
-npm run build
-npm pack                    # test locally first
-npm publish --access public
+npm install
+npx vercel
 ```
 
-Bump version with `npm version patch|minor|major` before publishing updates.
+Follow the prompts (link to your GitHub repo if you want). Then deploy to production:
+
+```bash
+npm run deploy
+```
+
+Or connect the repo at [vercel.com](https://vercel.com) — Vercel reads `vercel.json` and runs `npm run build:demo` automatically on each push.
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 
