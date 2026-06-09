@@ -1,6 +1,6 @@
 {
   "name": "r3f-webgpu-perf",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Monitor WebGPU/WebGL performance in React Three Fiber apps.",
   "keywords": [
     "react",

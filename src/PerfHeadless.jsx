@@ -1,6 +1,38 @@
 import { useRef, useEffect } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame, useThree, addEffect, addAfterEffect } from '@react-three/fiber'
 import { perfActions, getPerf } from './usePerf'
+
+function isWebGPURenderer(gl) {
+  return gl.isWebGPURenderer === true
+}
+
+function readRendererStats(gl, webgpu) {
+  const info = gl.info
+  if (!info?.render) return null
+
+  const render = info.render
+  const memory = info.memory || {}
+
+  if (webgpu) {
+    return {
+      drawCalls: render.drawCalls ?? render.frameCalls ?? 0,
+      triangles: render.triangles ?? 0,
+      lines: render.lines ?? 0,
+      points: render.points ?? 0,
+      geometries: memory.geometries ?? 0,
+      textures: memory.textures ?? 0,
+    }
+  }
+
+  return {
+    drawCalls: render.calls ?? 0,
+    triangles: render.triangles ?? 0,
+    lines: render.lines ?? 0,
+    points: render.points ?? 0,
+    geometries: memory.geometries ?? 0,
+    textures: memory.textures ?? 0,
+  }
+}
 
 /**
  * Count triangles and scene stats by traversing all objects
@@ -134,6 +166,43 @@ export function PerfHeadless({ logsPerSecond = 10 }) {
   const lastTimeRef = useRef(performance.now())
   const frameCountRef = useRef(0)
   const updateIntervalRef = useRef(0)
+  const renderStatsRef = useRef(null)
+  const isWebGPURef = useRef(isWebGPURenderer(gl))
+
+  useEffect(() => {
+    isWebGPURef.current = isWebGPURenderer(gl)
+  }, [gl])
+
+  // WebGL: reset info before each frame so reads reflect a single frame
+  useEffect(() => {
+    if (isWebGPURenderer(gl)) return undefined
+
+    if (gl.info) {
+      gl.info.autoReset = false
+    }
+
+    const unsub = addEffect(() => {
+      if (gl.info?.reset) gl.info.reset()
+    })
+
+    return () => {
+      unsub()
+      if (gl.info) {
+        gl.info.autoReset = true
+      }
+    }
+  }, [gl])
+
+  // Read renderer stats after each frame
+  useEffect(() => {
+    const unsub = addAfterEffect(() => {
+      renderStatsRef.current = readRendererStats(gl, isWebGPURef.current)
+    })
+
+    return () => {
+      unsub()
+    }
+  }, [gl])
   
   // Calculate update interval based on logsPerSecond
   useEffect(() => {
@@ -181,24 +250,33 @@ export function PerfHeadless({ logsPerSecond = 10 }) {
         vramBytes: 0,
       }
 
-      // Try WebGL info first
-      if (gl.info && gl.info.render) {
-        stats.drawCalls = gl.info.render.calls || 0
-        stats.triangles = gl.info.render.triangles || 0
-        stats.geometries = (gl.info.memory && gl.info.memory.geometries) || 0
-        stats.textures = (gl.info.memory && gl.info.memory.textures) || 0
-        if (gl.info.reset) gl.info.reset()
-      }
+      const webgpu = isWebGPURef.current
+      const fromRenderer = renderStatsRef.current
 
-      // Fallback to manual count (for WebGPU)
-      if (stats.triangles === 0 || !gl.info) {
-        const sceneStats = countSceneStats(scene)
-        stats.triangles = sceneStats.triangles
-        stats.geometries = sceneStats.geometries
-        stats.drawCalls = sceneStats.drawCalls
-        stats.textures = sceneStats.textures
-        stats.lines = sceneStats.lines
-        stats.points = sceneStats.points
+      if (webgpu) {
+        if (fromRenderer && fromRenderer.drawCalls > 0) {
+          stats.drawCalls = fromRenderer.drawCalls
+          stats.triangles = fromRenderer.triangles
+          stats.geometries = fromRenderer.geometries
+          stats.textures = fromRenderer.textures
+          stats.lines = fromRenderer.lines
+          stats.points = fromRenderer.points
+        } else {
+          const sceneStats = countSceneStats(scene)
+          stats.triangles = sceneStats.triangles
+          stats.geometries = sceneStats.geometries
+          stats.drawCalls = sceneStats.drawCalls
+          stats.textures = sceneStats.textures
+          stats.lines = sceneStats.lines
+          stats.points = sceneStats.points
+        }
+      } else if (fromRenderer) {
+        stats.drawCalls = fromRenderer.drawCalls
+        stats.triangles = fromRenderer.triangles
+        stats.geometries = fromRenderer.geometries
+        stats.textures = fromRenderer.textures
+        stats.lines = fromRenderer.lines
+        stats.points = fromRenderer.points
       }
 
       stats.vramBytes = calculateVRAMUsage(scene)

@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [0.1.4] - 2026-06-08
 
-- WebGPU demo with TSL `RenderPipeline` post-processing (bloom, chromatic aberration)
-- Instanced neon particle field with hero torus knot
-- Low / Med / Ultra GPU load presets in the demo
+### Fixed
+
+- Draw call counting now reads `gl.info.render.drawCalls` on WebGPU instead of the lifetime `calls` counter
+- WebGL draw calls are reset before each frame via `addEffect`, so samples reflect a single frame instead of accumulating across the stats interval
+- Renderer stats are captured in `addAfterEffect` after the frame renders
+- Scene traversal fallback runs only on WebGPU when the renderer reports zero draw calls
 
 ## [0.1.1] - 2026-06-08
 
