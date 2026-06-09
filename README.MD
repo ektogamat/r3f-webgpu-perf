@@ -57,17 +57,17 @@ function App() {
 
 ## Options
 
-| Prop            | Default      | Description                                                            |
-| --------------- | ------------ | ---------------------------------------------------------------------- |
-| `position`      | `'top-left'` | Panel position: `top-left`, `top-right`, `bottom-left`, `bottom-right` |
-| `showGraph`     | `true`       | Show real-time FPS/GPU/CPU graph                                       |
-| `showGauge`     | `true`       | Show circular gauge (click to cycle FPS → GPU → CPU)                   |
-| `minimal`       | `false`      | Condensed view with essential metrics only                             |
-| `showVRAM`      | `false`      | Show estimated VRAM usage bar                                          |
-| `logsPerSecond` | `10`         | How often scene stats refresh                                          |
+| Prop            | Default      | Description                                                                |
+| --------------- | ------------ | -------------------------------------------------------------------------- |
+| `position`      | `'top-left'` | Panel position: `top-left`, `top-right`, `bottom-left`, `bottom-right`     |
+| `showGraph`     | `true`       | Show real-time FPS/GPU/CPU graph                                           |
+| `showGauge`     | `true`       | Show circular gauge (click to cycle FPS → GPU → CPU)                       |
+| `minimal`       | `false`      | Condensed view with essential metrics only                                 |
+| `showVRAM`      | `false`      | Show estimated VRAM usage bar                                              |
+| `logsPerSecond` | `10`         | How often scene stats refresh                                              |
 | `openByDefault` | `true`       | Show panel on load (set `false` to start minimized as a dot in the corner) |
-| `className`     | —            | Custom CSS class on the portal wrapper                                 |
-| `style`         | —            | Inline styles on the portal wrapper                                    |
+| `className`     | —            | Custom CSS class on the portal wrapper                                     |
+| `style`         | —            | Inline styles on the portal wrapper                                        |
 
 ## Advanced: headless mode
 
@@ -130,7 +130,7 @@ npm run build       # build library to dist/
 npm run build:demo  # build demo to demo-dist/
 ```
 
-The demo uses **WebGPU + TSL post-processing** (`RenderPipeline`, `bloom`, `chromaticAberration`) with an instanced neon particle field and Low/Med/Ultra stress presets.
+The demo uses **WebGPU + TSL post-processing** (`RenderPipeline`, `bloom`, `chromaticAberration`).
 
 ## Changelog
 
